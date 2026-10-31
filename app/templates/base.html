@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Afterthought{% endblock %}</title>
+    {% block head %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+    <script src="{{ url_for('static', path='/app.js') }}" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="product-header">
+      <button id="menu-toggle" class="quiet-button" type="button" aria-label="Toggle thoughts menu" aria-controls="thought-sidebar" aria-expanded="true" hidden>☰</button>
+      <a class="wordmark" href="/">AFTERTHOUGHT</a>
+      <span class="product-tagline">A little space for your next idea.</span>
+    </header>
+    <div class="workspace">
+      <aside id="thought-sidebar" class="sidebar" aria-labelledby="sidebar-title">
+        <div class="sidebar-heading">
+          <h2 id="sidebar-title">Your thoughts</h2>
+          <button id="menu-close" class="quiet-button" type="button" aria-label="Close thoughts menu" hidden>×</button>
+        </div>
+        <a class="new-thought" href="/#title">+ New thought</a>
+        <nav aria-label="Saved thoughts">
+          {% for item in notes %}
+          <a class="sidebar-note{% if note is defined and item.id == note.id %} current{% endif %}" href="{{ url_for('note_detail', note_id=item.id) }}"{% if note is defined and item.id == note.id %} aria-current="page"{% endif %}>
+            <span class="sidebar-title">{{ item.title }}</span>
+            <span class="status status-{{ item.status.value }}">{{ item.status.value | capitalize }}</span>
+          </a>
+          {% else %}
+          <p class="muted sidebar-empty">Your saved thoughts will appear here.</p>
+          {% endfor %}
+        </nav>
+      </aside>
+      <button id="drawer-backdrop" aria-label="Close thoughts menu" tabindex="-1" hidden></button>
+      <main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
+    </div>
+  </body>
+</html>

@@ -1,50 +1,72 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ note.title }} | Afterthought</title>
-    {% if note.status.value == 'researching' %}
-    <meta http-equiv="refresh" content="2">
+{% extends "base.html" %}
+{% block title %}{{ note.title }} | Afterthought{% endblock %}
+{% block head %}
+  {% if note.status.value == 'researching' %}
+  <meta http-equiv="refresh" content="2">
+  {% endif %}
+{% endblock %}
+{% block content %}
+  <p class="eyebrow">Your thought</p>
+  <h1>{{ note.title }}</h1>
+  <div class="note-meta">
+    <span class="status status-{{ note.status.value }}">{{ note.status.value | capitalize }}</span>
+    <span class="muted">Created <time datetime="{{ note.created_at.isoformat() }}Z">{{ note.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time></span>
+  </div>
+  <div class="original-thought">
+    <h2>Original thought</h2>
+    <p class="preserve-lines">{{ note.body }}</p>
+    {% if note.context %}
+    <h3>Context</h3>
+    <p class="preserve-lines muted">{{ note.context }}</p>
     {% endif %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
-  </head>
-  <body>
-    <main>
-      <a href="/">Afterthought</a>
-      <h1>{{ note.title }}</h1>
-      <p><span class="status status-{{ note.status.value }}">{{ note.status.value }}</span></p>
-      <p class="muted">Created <time datetime="{{ note.created_at.isoformat() }}Z">{{ note.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time></p>
-      <h2>Original thought</h2>
-      <p class="preserve-lines">{{ note.body }}</p>
-      {% if note.context %}
-      <h2>Context</h2>
-      <p class="preserve-lines">{{ note.context }}</p>
-      {% endif %}
-      <section aria-label="Research">
-        <h2>Research</h2>
-        {% if note.status.value == 'saved' %}
-        <p>Saved. Research will start shortly.</p>
-        {% elif note.status.value == 'researching' %}
-        <p role="status">Researching your thought...</p>
-        {% elif note.status.value == 'complete' %}
-        <p class="preserve-lines">{{ note.research_summary }}</p>
-        <h3>Sources</h3>
-        <ul class="sources">
-          {% for source in sources %}
-          <li>{{ source.title }}<br><a href="{{ source.url }}">{{ source.url }}</a></li>
-          {% else %}
-          <li>No sources found.</li>
-          {% endfor %}
-        </ul>
-        {% if note.researched_at %}
-        <p class="muted">Researched <time datetime="{{ note.researched_at.isoformat() }}Z">{{ note.researched_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time></p>
+  </div>
+  <section aria-labelledby="research-title" class="research">
+    <div class="section-heading">
+      <h2 id="research-title">Research</h2>
+      <a class="button-link secondary" href="{{ url_for('note_detail', note_id=note.id) }}">Refresh</a>
+    </div>
+    {% if note.status.value == 'saved' %}
+    <p role="status" class="empty-state">Saved. Research will start shortly.</p>
+    {% elif note.status.value == 'researching' %}
+    <div class="empty-state" role="status">
+      <p>Researching your thought...</p>
+      <p class="muted">Gathering sources and putting together your brief. This page refreshes automatically; you can also use Refresh above.</p>
+    </div>
+    {% elif note.status.value == 'complete' %}
+    {% for section in sections %}
+    <section class="brief-section" aria-labelledby="brief-{{ loop.index }}">
+      <h3 id="brief-{{ loop.index }}">{{ section.title }}</h3>
+      {% for block in section.blocks %}
+        {% if block.kind == 'list' %}
+        <ul>{% for item in block['items'] %}<li>{{ item }}</li>{% endfor %}</ul>
+        {% else %}
+        <p>{{ block['items'][0] }}</p>
         {% endif %}
-        {% elif note.status.value == 'failed' %}
-        <p role="alert">Research failed.</p>
-        <p>{{ note.error_message }}</p>
-        {% endif %}
-      </section>
-    </main>
-  </body>
-</html>
+      {% else %}
+      <p class="muted">Not provided in this brief.</p>
+      {% endfor %}
+    </section>
+    {% endfor %}
+    <section class="source-section" aria-labelledby="sources-title">
+      <h3 id="sources-title">Sources</h3>
+      <ul class="sources">
+        {% for source in sources %}
+        <li><span>{{ source.title }}</span><br><a href="{{ source.url }}">{{ source.url }}</a></li>
+        {% else %}
+        <li>No sources found.</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% if note.researched_at %}
+    <p class="muted">Researched <time datetime="{{ note.researched_at.isoformat() }}Z">{{ note.researched_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time></p>
+    {% endif %}
+    {% elif note.status.value == 'failed' %}
+    <div class="errors" role="alert"><p>Research failed.</p><p>{{ note.error_message }}</p></div>
+    <p class="muted">Your thought is still saved. You can return to it at any time.</p>
+    {% endif %}
+  </section>
+  <footer class="thought-footer">
+    <a href="/">Back to home</a>
+    <a class="delete-link" href="{{ url_for('confirm_delete', note_id=note.id) }}">Delete thought</a>
+  </footer>
+{% endblock %}

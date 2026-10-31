@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Delete thought | Afterthought{% endblock %}
+{% block content %}
+  <p class="eyebrow">Please confirm</p>
+  <h1>Delete this thought?</h1>
+  <p>“{{ note.title }}” and all its saved research and sources will be permanently deleted.</p>
+  <form action="{{ url_for('delete_note', note_id=note.id) }}" method="post" class="delete-form">
+    <label class="confirm-label"><input type="checkbox" name="confirmed" value="true" required> I understand. Delete this thought and its research.</label>
+    <div class="actions">
+      <a class="button-link secondary" href="{{ url_for('note_detail', note_id=note.id) }}">Keep thought</a>
+      <button class="danger" type="submit">Delete thought</button>
+    </div>
+  </form>
+{% endblock %}

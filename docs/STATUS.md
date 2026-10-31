@@ -1,102 +1,115 @@
 # Current State
 
-Real web research is implemented: save a thought, search with Brave, synthesize
-the supplied source snippets with Gemma 4, and display the brief and original
-source links. Default mock mode remains deterministic and requires no keys.
+UI polish is complete. Afterthought has a shared product header, collapsible
+thought navigation, responsive drawer, readable research sections, visible
+Refresh action, and confirmed deletion. Existing Brave/Gemma research and
+deterministic default mock mode remain intact. No dependency was added.
 
 # Completed
 
-- BraveSearchProvider implements SearchProvider using httpx, the standard web
-  search endpoint, X-Subscription-Token, five results, and a 15-second timeout.
-  It maps only title/URL/snippet, removes snippet markup, and reports missing
-  credentials, HTTP/network errors, and malformed responses clearly.
-- Provider selection supports mock and brave, with mock still the safe default.
-  Brave mode never silently falls back to sample research.
-- Deterministic query generation uses title, thought, and optional context:
-  at most two queries, capped at 240 characters/40 words, with duplicate avoidance.
-- Combined results retain the first occurrence of each normalized URL and at
-  most eight useful sources. Stored URLs remain exactly those returned by search.
-  No page scraping was added.
-- Research opens its own database session, commits researching, requires useful
-  sources, calls Gemma, and stores summary/source JSON/time/complete. Failures
-  preserve the original note and commit failed with credential-safe messages.
-- Gemma's only model remains gemma-4-26b-a4b-it. Its prompt asks for overview,
-  findings, next steps, and uncertainties, grounded only in supplied material.
-  It validates a small JSON summary, accepts a JSON fence, rejects blank or invalid
-  output, and uses a 60-second request timeout. No database or search logic is
-  present in the wrapper. Mock mode keeps local synthesis and title-only search.
-- Removed the blanket mock disclaimer from completed note pages; actual mock
-  summaries and sample sources still identify themselves. Existing visual style
-  and status refresh behavior remain intact.
-- Updated README and architecture, preserving the visual map and MIT license.
-- Added isolated tests for query generation, duplicate avoidance, Brave request
-  and response mapping, HTTP/network/malformed/empty results, URL normalization,
-  combined sources, real-mode success and failures, Gemma model/prompt/validation,
-  source rendering and refresh persistence, and secret redaction. No automated
-  test makes a live Brave or Gemini call.
+- Added a shared AFTERTHOUGHT header and sidebar on home, detail, validation,
+  and delete confirmation pages. All saved thoughts appear newest first,
+  including an ID tie-breaker, with titles and compact capitalized status.
+  The open thought is highlighted and marked aria-current. Links open thoughts;
+  + New thought opens the home form.
+- Added a simple menu button, desktop collapse preference in localStorage
+  (with storage-error fallback), and a phone drawer. Drawer supports close
+  button, backdrop, Escape, focus containment/restoration, background inertness,
+  and resize handling. Without JavaScript, navigation stays visible and usable.
+  Uses 61 lines of vanilla JavaScript, no animation or frontend framework.
+- Added visible Refresh links on every research state; researching pages retain
+  their existing automatic two-second refresh. Refresh reloads stored results,
+  without starting another research task.
+- Added a delete confirmation page with required checkbox and Keep thought
+  action. POST also requires a true confirmation value. Deleting removes the
+  note, its summary, and saved sources together, then redirects home (303).
+  Unknown IDs return 404; GET confirmation never deletes.
+- Rendered Overview, Important findings, Next steps, and Uncertainties as HTML
+  sections, with proper lists. A small presentation helper handles expected
+  plain/Markdown headings, emphasis, backticks, links, bullet and numbered lines,
+  legacy Sample findings, and Use Cases. Templates autoescape all model text;
+  original saved summaries and source URLs are preserved. Missing sections say
+  they were not provided rather than inventing findings. Gemma still returns
+  one JSON summary string; prompt now explicitly requests headings on own lines.
+- Refined typography, spacing, form, original-thought block, statuses, sources,
+  empty/error states, and keyboard focus styles in calm green/neutral colors.
+  Removed the obsolete blanket mock-mode message from the home page.
+- Added 15 isolated test cases covering shared navigation order/current state,
+  Refresh/status labels, sections/lists/escaping/legacy briefs, confirmation,
+  deletion in every state, missing notes, keeping other notes, and deletion
+  during active research without resurrection. No live API calls in tests.
 
 # Files Changed
 
-- .env.example
-- README.md
-- app/schemas.py
-- app/search/brave.py (new)
-- app/search/provider.py
-- app/search/queries.py (new)
+- app/main.py
 - app/services/gemma.py
-- app/services/research.py
+- app/services/presentation.py (new)
+- app/static/app.js
+- app/static/styles.css
+- app/templates/base.html (new)
+- app/templates/delete.html (new)
+- app/templates/index.html
 - app/templates/note.html
-- docs/ARCHITECTURE.md
+- tests/test_ui.py (new)
 - docs/STATUS.md
-- tests/conftest.py
-- tests/test_research.py (new)
 
-# Verification
+# Verification and Commands Run
 
-Verified on 2026-10-31 using Python 3.12. Shell commands used the required rtk
-prefix (rtk proxy for Python commands).
+Verified on 2026-10-31 with Python 3.12. Shell commands used the required rtk
+prefix after reading RTK.md; PowerShell builtins were run through
+`rtk proxy powershell -NoProfile -Command`.
 
-- Baseline: `.venv\Scripts\python -m pytest -q`: 17 passed, one upstream warning.
-- Final: `.venv\Scripts\python -m pytest -q`: 49 passed, one upstream warning.
-- `.venv\Scripts\python -m pip check`: no broken requirements.
-- `git diff --check`: passed.
-- `.venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8766`:
-  application startup completed. urllib requests confirmed `/health` returned
-  200 with status ok and `/` returned 200 with the Save thought form. Stopped
-  the verification server afterward; no manual note was inserted.
-- `.env` presence check reported both GEMINI_API_KEY and SEARCH_API_KEY absent
-  or empty, without printing credentials. Live verification was skipped.
-  Neither Brave nor Gemma was actually called live. The model call asserted by
-  the mocked SDK test is exactly `gemma-4-26b-a4b-it`.
-- Read repository instructions, status, handoff, source and tests; inspected
-  Git status/diff/log/branch/remotes. Reviewed official Brave and Gemma API docs.
-- Generated the requested insulation example queries locally:
-  1. Home insulation for an older German house What insulation approaches are commonly recommended for older houses, and what problems should I watch for?
-  2. Home insulation for an older German house I want practical options and risks rather than a general explanation.
-- An initial credential-presence command had a shell quoting error and was
-  corrected; no credential contents were printed.
+- Read RTK.md, AGENTS.md, STATUS.md, HANDOFF.md, source, existing tests,
+  config, requirements, and ignore rules. Initial working tree was clean.
+- `rtk proxy .venv\Scripts\python -m pytest -q`: baseline 49 passed;
+  intermediate 63 passed; final 64 passed, one existing upstream warning.
+- `rtk git status --short`, `rtk rg --files app tests`,
+  `rtk git diff --stat`, `rtk git diff -- app/main.py app/services/gemma.py`,
+  and `rtk git diff --check` for inspection and whitespace verification.
+- `rtk proxy .venv\Scripts\python -c "import importlib.util; print('playwright', bool(importlib.util.find_spec('playwright')))"`:
+  Python Playwright unavailable; no package installed. Node runtime import also
+  failed; used the supported in-app browser instead.
+- An initial `rtk proxy Get-Content` failed because Get-Content is a PowerShell
+  builtin; corrected by invoking PowerShell through rtk proxy.
+- `rtk proxy .venv\Scripts\python .venv\ui_preview.py`: temporary preview
+  server on 127.0.0.1:8766, separate temporary SQLite DB and forced mock mode,
+  with two disposable sample thoughts. Preview script was removed afterward
+  and the server stopped. The user's database was not used or modified.
+- In-app browser checks at default narrow size, 1280x900, and 375x812:
+  home, note, and confirmation pages; desktop sidebar collapse/expand and
+  persistence after reload; current item highlight; drawer open/close,
+  Shift+Tab wrap, Escape and restored menu focus; thought selection;
+  clean headings/lists; visible Refresh; confirmation and Keep thought.
+  Phone DOM width equaled viewport width (360 CSS px after scrollbar).
+  Viewport override reset and temporary browser tab closed afterward.
+- Saved a full-page desktop preview outside the repository at
+  C:/Users/risha.RISHABH/.codex/visualizations/2026/10/31/01a19204-ce04-7543-b213-2be87a8c4e32/afterthought-ui.png.
+- Read Community Wisdom references on drawer focus management through
+  DevRelay; both inspected discussions had no comments. No external content
+  was posted and no live Brave/Gemini request was made.
 
 # Known Issues
 
-- Live API access and real output quality remain unverified because both keys
-  are missing. Configure both keys and SEARCH_PROVIDER=brave, then restart and
-  run the requested insulation note before the final demo.
-- Briefs use search snippets only. Prompt constraints reduce unsupported claims
-  but do not independently fact-check model output; no full-page extraction is
-  included in this iteration.
-- Background tasks run in the web process and are not durable. A restart can
-  leave a note researching; retries/recovery remain outside this slice.
-- Starlette TestClient emits its existing upstream httpx deprecation warning.
-  Tests pass and the warning is not suppressed.
+- Starlette TestClient emits the existing upstream httpx deprecation warning.
+  All tests pass; the warning remains unsuppressed.
+- Presentation supports the brief's small text convention rather than full
+  Markdown. Existing unstructured briefs fall back to Overview; unavailable
+  sections are marked as not provided. No schema/database migration is needed.
+- Live Brave/Gemma output quality remains unverified in this checkpoint.
+  The preceding checkpoint reported missing credentials; this task did not
+  inspect or change credentials. Research still uses snippets, not full pages.
+- Background tasks remain in-process and non-durable across restarts.
 
 # Exact Next Task
 
-Polish the research experience for the final demo: improve research output readability, loading/status feedback, empty/error states, and run a final end-to-end review.
-
-This next task has not been started.
+With the user's configured Brave and Gemini credentials and SEARCH_PROVIDER=brave,
+run a live end-to-end final-demo review using the older German house insulation
+thought. Verify source links and the four rendered sections, and record actual
+live success/failure without exposing credentials. No live request has been
+made as part of this UI task.
 
 # Checkpoint
 
-Commit message: `Connect real web research and Gemma 4`.
-Destination: origin/main at https://github.com/rishabh-hasija/afterthought.git.
-Use `git log -1 --oneline` for this checkpoint's hash.
+Commit message: `Polish thought navigation and research presentation`.
+Use `git log -1 --oneline` for this checkpoint's hash. Commit locally; no push
+was requested.

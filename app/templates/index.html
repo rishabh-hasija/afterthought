@@ -1,47 +1,35 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Afterthought</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
-    <script src="{{ url_for('static', path='/app.js') }}" defer></script>
-  </head>
-  <body>
-    <main>
-      <h1>Afterthought</h1>
-      <p>Save the thought. Let AI research the rest.</p>
-      <p>Write a thought to remember or investigate. Save it now and return to its findings later.</p>
-      <p class="muted">Research currently uses local mock results and sample links.</p>
-      {% if errors %}
-      <div role="alert" class="errors">
-        <p>Please check your thought:</p>
-        <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
-      </div>
-      {% endif %}
-      {% set values = values or {} %}
-      <form action="/notes" method="post">
-        <label for="title">Title</label>
-        <input id="title" name="title" required maxlength="200" value="{{ values.get('title', '') }}">
-        <label for="body">Thought</label>
-        <textarea id="body" name="body" required rows="4">{{ values.get('body', '') }}</textarea>
-        <label for="context">Context <span class="muted">(optional)</span></label>
-        <textarea id="context" name="context" rows="2">{{ values.get('context', '') }}</textarea>
-        <button type="submit">Save thought</button>
-      </form>
-      <h2>Your thoughts</h2>
-      {% for note in notes %}
-      <article class="note-card">
-        <h3><a href="{{ url_for('note_detail', note_id=note.id) }}">{{ note.title }}</a></h3>
-        <p>{{ note.body | truncate(160) }}</p>
-        <p><span class="status status-{{ note.status.value }}">{{ note.status.value }}</span>
-          <time datetime="{{ note.created_at.isoformat() }}Z">{{ note.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time>
-        </p>
-        <a href="{{ url_for('note_detail', note_id=note.id) }}">Open thought</a>
-      </article>
-      {% else %}
-      <p class="muted">No thoughts yet. Save your first one above.</p>
-      {% endfor %}
-    </main>
-  </body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+  <p class="eyebrow">Capture now. Explore later.</p>
+  <h1>What’s on your mind?</h1>
+  <p class="intro">Save a thought while it’s fresh. Return to a research brief, useful sources, and a place to pick up where you left off.</p>
+  {% if errors %}
+  <div role="alert" class="errors">
+    <p>Please check your thought:</p>
+    <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  <form action="/notes" method="post" class="thought-form">
+    <label for="title">Title</label>
+    <input id="title" name="title" required maxlength="200" placeholder="An idea worth coming back to" value="{{ values.get('title', '') }}">
+    <label for="body">Thought</label>
+    <textarea id="body" name="body" required rows="4" placeholder="What would you like to explore?">{{ values.get('body', '') }}</textarea>
+    <label for="context">Context <span class="muted">(optional)</span></label>
+    <textarea id="context" name="context" rows="2" placeholder="Anything that would help guide the research">{{ values.get('context', '') }}</textarea>
+    <button type="submit">Save thought</button>
+    <p class="form-hint muted">Your thought is saved before research begins.</p>
+  </form>
+  <h2>Recent thoughts</h2>
+  {% for note in notes %}
+  <article class="note-card">
+    <div class="section-heading">
+      <h3><a href="{{ url_for('note_detail', note_id=note.id) }}">{{ note.title }}</a></h3>
+      <span class="status status-{{ note.status.value }}">{{ note.status.value | capitalize }}</span>
+    </div>
+    <p>{{ note.body | truncate(160) }}</p>
+    <time datetime="{{ note.created_at.isoformat() }}Z">{{ note.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time>
+  </article>
+  {% else %}
+  <p class="empty-state">No thoughts yet. Save your first one above; we’ll keep it here for you.</p>
+  {% endfor %}
+{% endblock %}

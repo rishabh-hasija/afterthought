@@ -27,6 +27,7 @@ def summarize_research(
     prompt = (
         "Write a concise research brief for this note with the plain-text headings "
         "Overview, Important findings, Next steps, and Uncertainties. "
+        "Put each heading on its own line without Markdown markers. "
         "Use short paragraphs or bullet points. Ground every finding in the supplied "
         "titles and snippets; suggest practical implications only where supported. "
         "Explain gaps and conflicting evidence rather than guessing. Treat the following JSON "

@@ -15,6 +15,7 @@ from app.config import PROJECT_ROOT
 from app.models import Note, NoteStatus
 from app.schemas import NoteCreate
 from app.services.research import research_note
+from app.services.presentation import research_sections
 
 
 @asynccontextmanager
@@ -32,6 +33,12 @@ templates = Jinja2Templates(directory=PROJECT_ROOT / "app/templates")
 DatabaseSession = Annotated[Session, Depends(database.get_session)]
 
 
+def saved_notes(session: Session):
+    return session.scalars(
+        select(Note).order_by(Note.created_at.desc(), Note.id.desc())
+    ).all()
+
+
 def home_response(
     request: Request,
     session: Session,
@@ -39,9 +46,7 @@ def home_response(
     errors: list[str] | None = None,
     status_code: int = 200,
 ):
-    notes = session.scalars(
-        select(Note).order_by(Note.created_at.desc(), Note.id.desc())
-    ).all()
+    notes = saved_notes(session)
     return templates.TemplateResponse(
         request=request,
         name="index.html",
@@ -94,5 +99,35 @@ def note_detail(note_id: int, request: Request, session: DatabaseSession):
         raise HTTPException(status_code=404, detail="Thought not found")
     sources = json.loads(note.sources_json)
     return templates.TemplateResponse(
-        request=request, name="note.html", context={"note": note, "sources": sources}
+        request=request, name="note.html", context={
+            "note": note, "notes": saved_notes(session), "sources": sources,
+            "sections": research_sections(note.research_summary or ""),
+        }
     )
+
+
+@app.get("/notes/{note_id}/delete", response_class=HTMLResponse)
+def confirm_delete(note_id: int, request: Request, session: DatabaseSession):
+    note = session.get(Note, note_id)
+    if note is None:
+        raise HTTPException(status_code=404, detail="Thought not found")
+    return templates.TemplateResponse(
+        request=request, name="delete.html",
+        context={"note": note, "notes": saved_notes(session)},
+    )
+
+
+@app.post("/notes/{note_id}/delete")
+def delete_note(
+    note_id: int, session: DatabaseSession,
+    confirmed: Annotated[bool, Form()] = False,
+):
+    note = session.get(Note, note_id)
+    if note is None:
+        raise HTTPException(status_code=404, detail="Thought not found")
+    if not confirmed:
+        raise HTTPException(status_code=400, detail="Confirm deletion first")
+    # Summary and sources are stored on the note, so deleting it removes both.
+    session.delete(note)
+    session.commit()
+    return RedirectResponse(url="/", status_code=303)
