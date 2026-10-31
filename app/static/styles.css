@@ -40,16 +40,14 @@ time { font-size: .8rem; }
 main { width: 100%; max-width: 49rem; margin: 0 auto; padding: 3rem 2.5rem 4rem; min-width: 0; }
 .eyebrow { text-transform: uppercase; font-size: .7rem; letter-spacing: .14em; color: #64735f; font-weight: 650; margin: 0; }
 .intro { color: #646e67; max-width: 37rem; }
-.thought-form, .delete-form, .note-card { padding: 1.5rem; border: 1px solid #dfe4dc; border-radius: .65rem; background: white; }
+.thought-form, .delete-form { padding: 1.5rem; border: 1px solid #dfe4dc; border-radius: .65rem; background: white; }
 .thought-form, .delete-form { margin: 2rem 0; }
 label { display: block; font-size: .9rem; font-weight: 600; margin-bottom: .4rem; }
 input:not([type="checkbox"]), textarea { width: 100%; padding: .7rem .8rem; margin-bottom: 1.25rem; border: 1px solid #aab7aa; border-radius: .35rem; background: #fdfefb; color: inherit; }
 input::placeholder, textarea::placeholder { color: #758073; }
 textarea { resize: vertical; }
 .form-hint { font-size: .8rem; margin: .8rem 0 0; }
-.note-card { margin: 1rem 0; overflow-wrap: anywhere; }
-.note-card h3, .section-heading h2 { margin: 0; }
-.note-card p { margin: .75rem 0; }
+.section-heading h2 { margin: 0; }
 .status { display: inline-block; white-space: nowrap; padding: .15rem .55rem; border-radius: 1rem; background: #e8ece6; color: #48564b; font-size: .75rem; font-weight: 550; }
 .status-researching { background: #f5edcf; color: #69551c; }
 .status-complete { background: #dfecdf; color: #315b3b; }
@@ -87,5 +85,5 @@ textarea { resize: vertical; }
   body.menu-ready .sidebar { position: fixed; inset: var(--header-height) auto 0 0; width: min(20rem, 88vw); z-index: 30; max-height: calc(100dvh - var(--header-height)); height: calc(100dvh - var(--header-height)); }
   #drawer-backdrop { position: fixed; inset: var(--header-height) 0 0; z-index: 20; width: 100%; height: calc(100dvh - var(--header-height)); border: 0; border-radius: 0; background: #1d302b66; padding: 0; }
   body.drawer-open { overflow: hidden; }
-  .thought-form, .delete-form, .note-card { padding: 1.1rem; }
+  .thought-form, .delete-form { padding: 1.1rem; }
 }

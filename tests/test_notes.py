@@ -96,16 +96,19 @@ def test_post_runs_background_research_and_displays_result(client, test_database
         assert session.scalar(select(Note)).status == NoteStatus.complete
 
 
-def test_home_lists_newest_notes_first(client, test_database):
+def test_home_lists_notes_only_in_sidebar_newest_first(client, test_database):
     first_id = save_note(test_database, created_at=datetime(2026, 1, 1))
     second_id = save_note(test_database, created_at=datetime(2026, 1, 1) + timedelta(days=1))
     response = client.get("/")
     assert response.status_code == 200
     assert "Save thought" in response.text
-    assert "How do they work?" in response.text
+    assert "Recent thoughts" not in response.text
+    assert 'class="note-card"' not in response.text
+    assert "How do they work?" not in response.text
     assert response.text.index(f'/notes/{second_id}') < response.text.index(f'/notes/{first_id}')
-    assert "saved" in response.text
-    assert "2026-01-02" in response.text
+    for note_id in (first_id, second_id):
+        assert response.text.count(f'href="http://testserver/notes/{note_id}"') == 1
+    assert ">Saved</span>" in response.text
 
 
 @pytest.mark.parametrize("data", [

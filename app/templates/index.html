@@ -19,17 +19,4 @@
     <button type="submit">Save thought</button>
     <p class="form-hint muted">Your thought is saved before research begins.</p>
   </form>
-  <h2>Recent thoughts</h2>
-  {% for note in notes %}
-  <article class="note-card">
-    <div class="section-heading">
-      <h3><a href="{{ url_for('note_detail', note_id=note.id) }}">{{ note.title }}</a></h3>
-      <span class="status status-{{ note.status.value }}">{{ note.status.value | capitalize }}</span>
-    </div>
-    <p>{{ note.body | truncate(160) }}</p>
-    <time datetime="{{ note.created_at.isoformat() }}Z">{{ note.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time>
-  </article>
-  {% else %}
-  <p class="empty-state">No thoughts yet. Save your first one above; we’ll keep it here for you.</p>
-  {% endfor %}
 {% endblock %}

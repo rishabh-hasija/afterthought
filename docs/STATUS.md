@@ -10,7 +10,43 @@ Desktop navigation and the mobile drawer begin below the persistent header.
 The home form now carries "Save the thought. Let AI research the rest."
 The header tagline has been removed from every page.
 
-# Latest Follow-up: Sticky Header and Home Message
+The home page now ends with the new-thought form. The sidebar is the only
+saved-thought browsing list; duplicate Recent thoughts cards are removed.
+
+# Latest Follow-up: Remove Duplicate Home List
+
+Completed on 2026-10-31:
+
+- Removed the Recent thoughts heading, saved-thought cards, and their empty
+  state from home. Preserved the product message, form, sticky header, and
+  sidebar. Removed CSS used only by the deleted cards.
+- Updated the existing home test to verify newest-first links appear once
+  per thought and no duplicate heading, cards, or body snippets appear.
+- Files changed: app/templates/index.html, app/static/styles.css,
+  tests/test_notes.py, docs/STATUS.md.
+- Read AGENTS.md, STATUS.md, HANDOFF.md, home template, and existing tests.
+  Initial working tree was clean.
+- Baseline and final `rtk proxy .venv\Scripts\python -m pytest -q`:
+  64 passed, same upstream Starlette/httpx warning. `rtk git diff --check`
+  passed. Inspected `rtk git status --short` and `rtk git diff --stat`.
+- Ran `rtk proxy .venv\Scripts\python .venv\ui_preview.py` with an isolated
+  temporary SQLite database, mock mode, and two sample notes. Checked home
+  at 1280x900 and 375x812: main ends with FORM, no article cards; desktop
+  sidebar lists both notes and opens the chosen detail page. Mobile form
+  submission saved a third thought and completed mock research. Mobile
+  drawer then listed all three newest first and opened another selected note.
+  Mobile home document/viewport widths matched at 360 CSS px. Browser viewport
+  reset, tab closed, preview server stopped, and temporary script removed.
+  No user's notes/credentials were changed; no live APIs called.
+- Desktop preview saved outside the repository:
+  C:/Users/risha.RISHABH/.codex/visualizations/2026/10/31/01a19204-ce04-7543-b213-2be87a8c4e32/afterthought-home.png.
+- No new known issues. Exact next task remains the live final-demo review
+  below, when requested/configured.
+
+Checkpoint message: `Remove duplicate thoughts list from home`.
+Use `git log -1 --oneline` for its hash. No push requested.
+
+# Previous Follow-up: Sticky Header and Home Message
 
 Completed on 2026-10-31:
 
