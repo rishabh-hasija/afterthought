@@ -13,7 +13,43 @@ The header tagline has been removed from every page.
 The home page now ends with the new-thought form. The sidebar is the only
 saved-thought browsing list; duplicate Recent thoughts cards are removed.
 
-# Latest Follow-up: Remove Duplicate Home List
+Research detail pages now end with only Delete thought. The redundant Back to
+home link is removed; footer spacing is reduced and the action stays right aligned.
+
+# Latest Follow-up: Simplify Research Footer
+
+Completed on 2026-10-31:
+
+- Removed Back to home without adding a replacement. Kept Delete thought.
+- Simplified footer CSS to a single right-aligned action, reducing margin-top
+  from 3rem to 2rem and padding-top from 1.5rem to 1rem.
+- Files changed: app/templates/note.html, app/static/styles.css, docs/STATUS.md.
+- Read AGENTS.md, STATUS.md, HANDOFF.md and affected template/styles.
+  Initial working tree was clean.
+- Baseline and final `rtk proxy .venv\Scripts\python -m pytest -q`: 64 passed,
+  same upstream Starlette/httpx warning. Existing tests verify confirmation,
+  deletion in every state, research removal, and redirection home.
+- `rtk git diff --check`: passed. Inspected `rtk git diff --stat` and
+  `rtk git status --short`; committed locally.
+- Ran `rtk proxy .venv\Scripts\python .venv\ui_preview.py` with separate
+  temporary SQLite database, mock mode, and one sample completed thought.
+  At 1280x900 and 375x812, verified only Delete thought in footer. Desktop
+  footer height was approximately 39px with 32px top margin. Mobile document
+  width matched viewport width (360 CSS px). Delete thought opened its
+  confirmation page, Keep thought returned to detail, and the mobile sidebar's
+  + New thought opened the home form. No live APIs or user data touched.
+- An optional final screenshot pass timed out in browser automation after
+  these checks; recovering that tab also timed out. Viewport override was
+  successfully reset. No screenshot artifact saved for this follow-up.
+  Temporary browser tab remains unmarked and will close at turn end.
+- Stopped preview server and removed temporary script. No new application
+  issues found; existing limitations below remain. Exact next task remains
+  the live final-demo review below, when requested/configured.
+
+Checkpoint message: `Remove redundant home link from research footer`.
+Use `git log -1 --oneline` for its hash. No push requested.
+
+# Previous Follow-up: Remove Duplicate Home List
 
 Completed on 2026-10-31:
 

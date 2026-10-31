@@ -71,7 +71,7 @@ textarea { resize: vertical; }
 .errors { background: #faeae7; color: #853b31; padding: .6rem 1rem; border-radius: .4rem; margin: 1rem 0; overflow-wrap: anywhere; }
 .empty-state { padding: 1.25rem; border: 1px dashed #cdd6ca; border-radius: .5rem; margin: 1.5rem 0; color: #646e67; }
 .empty-state p { margin: .25rem 0; }
-.thought-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; border-top: 1px solid #dfe4dc; padding-top: 1.5rem; margin-top: 3rem; font-size: .85rem; }
+.thought-footer { text-align: right; border-top: 1px solid #dfe4dc; padding-top: 1rem; margin-top: 2rem; font-size: .85rem; }
 .delete-link { color: #853b31; }
 .confirm-label { display: flex; gap: .7rem; align-items: baseline; font-weight: 400; }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
