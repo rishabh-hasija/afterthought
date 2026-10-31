@@ -26,13 +26,27 @@
       <div class="research-actions">
         {% if note.status.value in ['complete', 'failed'] %}
         <form action="{{ url_for('research_again', note_id=note.id) }}" method="post">
+          {% if note.status.value == 'complete' %}
+          <button class="research-icon" type="submit" title="Research again" aria-label="Research again">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M20 7v5h-5"/><path d="M20 12a8 8 0 1 0-2.3 5.7"/>
+            </svg>
+          </button>
+          {% else %}
           <button class="secondary" type="submit">Research again</button>
+          {% endif %}
         </form>
         {% endif %}
         {% if note.status.value == 'complete' %}
-        <a class="button-link secondary" href="{{ url_for('download_pdf', note_id=note.id) }}">Download PDF</a>
+        <a class="research-icon" href="{{ url_for('download_pdf', note_id=note.id) }}" title="Download PDF" aria-label="Download PDF">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/>
+          </svg>
+        </a>
         {% endif %}
+        {% if note.status.value == 'researching' %}
         <a class="button-link secondary" href="{{ url_for('note_detail', note_id=note.id) }}">Refresh</a>
+        {% endif %}
       </div>
     </div>
     {% if note.status.value == 'saved' %}
@@ -62,15 +76,19 @@
       {% if followup_error %}<div class="errors" role="alert">{{ followup_error }}</div>{% endif %}
       {% if followups | length < 4 %}
       <form id="followup-form" action="{{ url_for('create_followup', note_id=note.id) }}" method="post">
-        <fieldset class="context-selector">
-          <legend>Use context:</legend>
-          <label><input type="radio" name="context_mode" value="research" {% if context_mode != 'conversation' %}checked{% endif %}> Research only</label>
-          <label><input type="radio" name="context_mode" value="conversation" {% if context_mode == 'conversation' %}checked{% endif %}> Research + previous follow-ups</label>
-        </fieldset>
+        <div class="followup-context">
+          <input type="hidden" id="research-context" name="context_mode" value="research" {% if context_mode == 'conversation' %}disabled{% endif %}>
+          <label class="context-switch" for="include-earlier-answers">
+            <span>Include earlier answers</span>
+            <input type="checkbox" role="switch" id="include-earlier-answers" name="context_mode" value="conversation" aria-describedby="context-help" {% if context_mode == 'conversation' %}checked{% endif %}>
+            <span class="switch-track" aria-hidden="true"></span>
+          </label>
+          <p class="form-hint muted" id="context-help">{{ 'Includes earlier follow-ups.' if context_mode == 'conversation' else 'Uses saved research only.' }}</p>
+        </div>
         <label for="followup-question">Question</label>
         <textarea id="followup-question" name="question" rows="3" maxlength="500" required placeholder="Ask something about this research...">{{ question }}</textarea>
         <button type="submit">Ask Afterthought</button>
-        <p class="form-hint muted" role="status" id="followup-status">{{ followups | length }} of 4 follow-ups used. Answers use saved research without a new search.</p>
+        <p class="form-hint muted" role="status" id="followup-status">{{ followups | length }} of 4 follow-ups used.</p>
       </form>
       {% else %}
       <p class="muted">You've reached the follow-up limit for this research.</p>

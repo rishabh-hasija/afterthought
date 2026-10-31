@@ -1,4 +1,75 @@
-# Current State: Follow-ups and PDF Export
+# Current State: Compact Research Controls
+
+Completed on 2026-10-31. UI-only refinement; product behavior is unchanged.
+
+- Completed research shows only circular-arrow and download SVG icon actions
+  beside Research. Both have exact title/aria-label text, hover/keyboard tooltips,
+  visible focus outlines and 44x44px targets. No icon library or visible labels.
+- Refresh appears only while research is actively researching. Failed research
+  retains its existing text retry button; completed research has no Refresh.
+- Replaced radios with the compact Include earlier answers switch, default OFF.
+  OFF submits research; ON submits conversation. JavaScript updates the helper
+  and enables the matching successful form control. Error rendering preserves
+  the selected mode. Space toggles the native checkbox switch; its description
+  is associated through aria-describedby and its focus ring is visible.
+- Helper text is Uses saved research only. / Includes earlier follow-ups.
+  Usage text is now simply N of 4 follow-ups used. No panel or new functionality.
+- Backend, database schema, limits, saved records, PDF contents, research services,
+  sidebar and deletion are unchanged.
+
+## Files Changed
+
+- app/templates/note.html
+- app/static/styles.css
+- app/static/app.js
+- tests/test_ui.py
+- tests/test_followups.py
+- docs/STATUS.md
+- docs/HANDOFF.md
+
+## Verification and Commands
+
+- Read AGENTS.md, STATUS.md, HANDOFF.md and affected template/styles/script/tests.
+  Initial working tree was clean on main.
+- Baseline `rtk proxy .venv\Scripts\python -m pytest -q`: 90 passed.
+  Final: 92 passed; same upstream Starlette/httpx warning. Updated state-specific
+  Refresh coverage, added icon accessibility/default-switch markup checks, and
+  updated the existing failure-retains-context test. Existing follow-up, PDF,
+  research and deletion tests all pass without live APIs.
+- `rtk proxy .venv\Scripts\python .venv/ui_preview.py`: temporary isolated SQLite
+  database, mock follow-up answers and forced mock search. An initial attempt to
+  launch this as a relative module failed; launched the script directly instead.
+  Script was removed and server stopped after verification. No user database,
+  credentials, Brave calls, Gemini calls or remaining real follow-up slot used.
+- Browser submitted OFF and ON questions successfully: mock responses confirmed
+  no history for OFF and one earlier follow-up for ON. Switch changed helper text
+  both ways with Space. Research icon activated with Enter and completed mock
+  research while retaining follow-ups. PDF icon activated with Enter and produced
+  a download (prototype-review.pdf in the browser Downloads folder).
+- At 375x812: icon targets were 44x44px, switch label target was 44px high,
+  document width 360px excluding scrollbar, viewport 375px: no horizontal overflow.
+  Reviewed form, helper, question and count with three saved follow-ups. At
+  1280x900 verified secondary icon layout and keyboard PDF focus: solid outline,
+  tooltip opacity 1 with Download PDF text. Reset viewport and closed preview tab.
+- Previews outside repository:
+  C:/Users/risha.RISHABH/.codex/visualizations/2026/10/31/01a1923b-7461-7912-8a42-7e03864e182b/refined-actions-desktop.png
+  and refined-controls-mobile.png in the same directory.
+- Inspected `rtk git diff -- ...`, `rtk git status --short` and
+  `rtk git diff --check`. Used `rtk git fetch origin main` before push; remote
+  had no divergent commits. The requested push includes the two preceding local
+  checkpoints (footer cleanup and follow-ups/PDF export) plus this refinement.
+- Commit message: Refine research actions and follow-up controls.
+  Push target: origin/main. Check `git log -1 --oneline` for the hash.
+
+## Known Problems and Exact Next Task
+
+No new known problems. Existing Starlette/httpx warning and single-process
+follow-up/research limitations still apply. Requested UI refinement is complete.
+Next, only when requested, run the older-German-house-insulation final-demo review
+with configured Brave/Gemma. The existing Gemma item still has one follow-up slot;
+do not consume it during routine checks.
+
+# Previous Checkpoint: Follow-ups and PDF Export
 
 Completed on 2026-10-31. This section supersedes the historical next tasks below.
 

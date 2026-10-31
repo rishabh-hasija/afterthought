@@ -40,11 +40,39 @@ def test_shared_sidebar_order_current_and_product_header(client, test_database):
 
 
 @pytest.mark.parametrize("status", list(NoteStatus))
-def test_refresh_is_visible_for_every_research_state(client, test_database, status):
+def test_refresh_is_visible_only_while_researching(client, test_database, status):
     note_id = save_note(test_database, status=status)
     html = client.get(f"/notes/{note_id}").text
-    assert f'href="http://testserver/notes/{note_id}">Refresh</a>' in html
+    assert (f'href="http://testserver/notes/{note_id}">Refresh</a>' in html) == (status == NoteStatus.researching)
     assert f'>{status.value.capitalize()}</span>' in html
+
+
+def test_completed_research_has_accessible_icon_actions(client, test_database):
+    note_id = save_note(test_database, status=NoteStatus.complete)
+    html = client.get(f"/notes/{note_id}").text
+    for label in ("Research again", "Download PDF"):
+        assert f'title="{label}" aria-label="{label}"' in html
+        assert f'>{label}</' not in html
+    assert f'action="http://testserver/notes/{note_id}/research" method="post"' in html
+    assert f'href="http://testserver/notes/{note_id}/export.pdf"' in html
+    assert html.count('<svg ') == 2
+    assert html.count('aria-hidden="true" focusable="false"') == 2
+    assert '>Refresh</a>' not in html
+
+
+def test_followup_switch_defaults_to_research_only(client, test_database):
+    note_id = save_note(test_database, status=NoteStatus.complete)
+    html = client.get(f"/notes/{note_id}").text
+    assert 'type="radio"' not in html and 'Use context:' not in html
+    assert 'Include earlier answers' in html
+    assert 'id="research-context" name="context_mode" value="research" >' in html
+    assert 'role="switch"' in html
+    switch = html.split('id="include-earlier-answers"', 1)[1].split('>', 1)[0]
+    assert 'name="context_mode" value="conversation"' in switch
+    assert 'checked' not in switch
+    assert 'aria-describedby="context-help"' in switch
+    assert 'id="context-help">Uses saved research only.</p>' in html
+    assert '0 of 4 follow-ups used.</p>' in html
 
 
 def test_brief_sections_lists_and_escaping(client, test_database):

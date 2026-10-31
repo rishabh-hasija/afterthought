@@ -63,6 +63,14 @@ smallScreen.addEventListener("change", () => setMenu(smallScreen.matches ? false
 
 const followupForm = document.getElementById("followup-form");
 if (followupForm) {
+  const includeEarlier = document.getElementById("include-earlier-answers");
+  function updateContext() {
+    document.getElementById("research-context").disabled = includeEarlier.checked;
+    document.getElementById("context-help").textContent = includeEarlier.checked
+      ? "Includes earlier follow-ups." : "Uses saved research only.";
+  }
+  includeEarlier.addEventListener("change", updateContext);
+  updateContext();
   followupForm.addEventListener("submit", event => {
     if (followupForm.dataset.submitting) { event.preventDefault(); return; }
     followupForm.dataset.submitting = "true";
@@ -70,6 +78,7 @@ if (followupForm) {
     document.getElementById("followup-status").textContent = "Answering your follow-up...";
   });
   window.addEventListener("pageshow", () => {
+    updateContext();
     delete followupForm.dataset.submitting;
     followupForm.querySelector('button[type="submit"]').disabled = false;
   });

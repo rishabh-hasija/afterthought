@@ -109,7 +109,10 @@ def test_failure_preserves_record_and_question(client, test_database, completed,
     assert response.status_code == 502
     assert "secret-api-key" not in response.text
     assert "Retry this question" in response.text
-    assert 'value="conversation" checked' in response.text
+    assert 'id="research-context" name="context_mode" value="research" disabled' in response.text
+    switch = response.text.split('id="include-earlier-answers"', 1)[1].split('>', 1)[0]
+    assert 'checked' in switch
+    assert 'id="context-help">Includes earlier follow-ups.</p>' in response.text
     with test_database() as session:
         note = session.get(Note, completed)
         assert note.status == NoteStatus.complete

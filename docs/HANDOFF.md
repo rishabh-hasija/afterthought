@@ -2,7 +2,12 @@
 
 Only one coding agent should actively modify the project at a time.
 
-Latest checkpoint adds saved follow-ups and PDF export. Read the TOP section of
+Latest checkpoint refines completed research into SVG icon actions and a compact
+Include earlier answers switch. Backend context modes remain research/conversation;
+Refresh appears only during active research. This UI-only commit was requested
+for origin/main. Read the TOP section of STATUS.md for verification and next task.
+
+The preceding checkpoint adds saved follow-ups and PDF export. Read the TOP section of
 STATUS.md; its next task supersedes the older UI checkpoint tasks. The local
 Gemma research item now has three requested live follow-ups (research,
 conversation, research); one slot remains. Do not consume it during routine tests.
