@@ -11,6 +11,8 @@ and sources. Your thoughts appear newest first on the home page. Choose Brave
 Search and Gemma 4 for real web research, or use the default local mock mode
 without API keys.
 
+Demo: https://drive.google.com/file/d/1xoUuKTGHFr6z99Vi7blHTyW5CgGBmzgv/view?usp=drive_link
+
 ## Architecture map
 
 ```text
