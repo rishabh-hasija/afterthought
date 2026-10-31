@@ -61,6 +61,10 @@ def test_followups_persist_in_order_and_context_is_explicit(client, test_databas
         assert all(f.created_at for f in records)
     page = client.get(f"/notes/{completed}").text
     assert page.index("First question?") < page.index("Second question?") < page.index("Third question?")
+    assert page.count('class="followup-question"') == 4
+    assert page.count('class="followup-answer"') == 4
+    assert '<h4 class="visually-hidden">Question</h4>' in page
+    assert '<h4 class="visually-hidden">Answer</h4>' in page
     assert page.index("Ask a follow-up") < page.index("First question?") < page.index('id="sources-title"')
     assert "You've reached the follow-up limit" in page
     assert 'id="followup-form"' not in page

@@ -2,7 +2,13 @@
 
 Only one coding agent should actively modify the project at a time.
 
-Latest checkpoint refines completed research into SVG icon actions and a compact
+Latest checkpoint polishes saved follow-ups into separate Q/A presentation and
+refines PDF dates, shading, page breaks and linked compact sources. No logic,
+schema or dependency changes. All 95 tests, pip check and diff check pass;
+all pages of both review PDFs were rendered and visually inspected. Read the
+top of STATUS.md for full verification details. Requested push is origin/main.
+
+The previous checkpoint refines completed research into SVG icon actions and a compact
 Include earlier answers switch. Backend context modes remain research/conversation;
 Refresh appears only during active research. This UI-only commit was requested
 for origin/main. Read the TOP section of STATUS.md for verification and next task.

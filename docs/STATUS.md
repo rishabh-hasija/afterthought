@@ -1,4 +1,88 @@
-# Current State: Compact Research Controls
+# Current State: Follow-up and PDF Readability
+
+Completed on 2026-10-31. Presentation-only polish; no product or database changes.
+
+- Each saved web follow-up now has a small section label, a lightly green-tinted
+  question block with a subtle left border and Q badge, and a separate A-labelled
+  answer on the page background. Separate follow-ups have more vertical spacing.
+  Full Question/Answer headings remain accessible to screen readers; decorative
+  badges are hidden from the accessibility tree. Long text wraps within the page.
+- PDF now uses date-only Created and Research completed metadata, formatted like
+  October 31, 2026. Removed Exported entirely; no generated-time footer was added.
+  The web page's existing metadata is unchanged.
+- PDF major headings have a restrained green accent; body typography and margins
+  remain consistent with the existing document. Follow-up labels are smaller,
+  question text is shaded, and answers stay on the normal background.
+- Conditional page breaks keep question/answer labels with initial text while
+  allowing long answers to split naturally. An initial visual check found that
+  keepWithNext moved a long answer to a new page and wasted space; fixed this and
+  added a regression assertion that a long question and answer start on one page.
+- Sources are compact numbered clickable titles, clickable domains, and small
+  muted full URLs when a path/query/fragment is needed to verify a printed copy.
+  Every link uses its exact saved URL; unsafe/non-HTTP links are plain text.
+- Branding, title, original thought, optional context, research sections,
+  discussion, sources, page numbers, routes, persistence and limits are retained.
+
+## Files Changed
+
+- app/templates/note.html
+- app/static/styles.css
+- app/services/pdf_export.py
+- tests/test_followups.py
+- tests/test_pdf_export.py
+- docs/STATUS.md
+- docs/HANDOFF.md
+
+## Verification and Commands
+
+- Read AGENTS.md, STATUS.md, HANDOFF.md, current PDF service, note template,
+  styles and tests. Initial working tree was clean on main.
+- Baseline `rtk proxy .venv\Scripts\python -m pytest -q`: 92 passed.
+  Final requested `rtk proxy .venv\Scripts\python -m pytest`: 95 passed,
+  one existing Starlette/httpx warning. Tests cover date formatting and removed
+  timestamp text, exact source hyperlink destinations, safe text markup,
+  long follow-up splitting and accessible web labels. Existing research,
+  follow-up, PDF, deletion and route tests all pass without live APIs.
+- `rtk proxy .venv\Scripts\python -m pip check`: No broken requirements found.
+  `rtk git diff --check`: passed. No dependencies added.
+- PDF artifact-operation marker succeeded for two review exports. Read the
+  existing Gemma record without altering it; exported it and a synthetic record
+  containing a 500-character question, multi-page answer and long URL. Used
+  bundled Poppler pdftoppm to render both; visually inspected ALL final pages
+  (three saved-record pages and four long-record pages), including after the
+  page-break adjustment. No stranded Q/A labels, clipped text or glyph defects.
+  Poppler emitted its base Symbol/ArialUnicode font-lookup diagnostics; embedded
+  content and the emoji rendered correctly during visual review.
+- Independently extracted the final saved-record PDF with bundled pypdf: all
+  saved follow-up questions/answers are present, every saved URL is a hyperlink
+  destination, dates are human readable and UTC/Exported are absent. pypdf and
+  Poppler remain verification tools only, not application dependencies.
+- `rtk proxy .venv\Scripts\python .venv/readability_preview.py`: separate temporary
+  SQLite database populated from read-only copies of the existing record and a
+  synthetic long-text case. Checked web presentation at 1280x900 and 375x812.
+  Accessibility tree retains full Question/Answer headings. Long question and
+  answer, including unbroken words, wrap with document/client widths both 360px
+  on mobile. Reviewed both desktop and mobile screenshots. Reset viewport,
+  closed tab, stopped preview server and removed temporary preview script.
+  No live Brave/Gemma requests, user database edits or follow-up slots consumed.
+- Review artifacts outside repository, in
+  C:/Users/risha.RISHABH/.codex/visualizations/2026/10/31/01a1923b-7461-7912-8a42-7e03864e182b/:
+  polished-research.pdf, polished-long-record.pdf, polished-page-1.png through
+  polished-page-3.png, long-page-1.png through long-page-4.png,
+  polished-followups-desktop.png and polished-followups-mobile.png.
+- Reviewed `rtk git diff --stat`, fetched `origin main`, and confirmed no remote
+  divergence before commit/push. Checkpoint message:
+  Polish follow-up and PDF readability. Push target: origin/main.
+
+## Known Problems and Exact Next Task
+
+No new known problems. Existing TestClient warning, PDF script-coverage limits,
+and single-process/in-process-task limitations remain. Requested polish is done.
+Next, only when requested, run the older-German-house-insulation final-demo
+review with configured Brave/Gemma. The real Gemma record retains its last
+follow-up slot; do not use it during routine verification.
+
+# Previous Checkpoint: Compact Research Controls
 
 Completed on 2026-10-31. UI-only refinement; product behavior is unchanged.
 

@@ -10,6 +10,7 @@
 html { scroll-padding-top: calc(var(--header-height) + 1rem); }
 body { margin: 0; }
 [hidden] { display: none !important; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 a { color: #315c4d; text-underline-offset: .2em; }
 button, input, textarea { font: inherit; }
 button, .button-link { display: inline-block; border: 1px solid transparent; border-radius: .4rem; padding: .6rem 1rem; background: #315c4d; color: white; cursor: pointer; text-decoration: none; }
@@ -90,9 +91,13 @@ textarea { resize: vertical; }
 .context-switch input:checked + .switch-track::after { transform: translateX(14px); }
 .context-switch input:focus-visible + .switch-track { outline: 3px solid #ab751c; outline-offset: 3px; }
 .followup-context .form-hint { margin: 0; }
-.followup-record { margin-top: 1.75rem; overflow-wrap: anywhere; }
-.followup-record h4 { font-size: .85rem; margin-bottom: .3rem; }
-.followup-record p { margin-top: .3rem; }
+.followup-record { margin-top: 2rem; overflow-wrap: anywhere; }
+.followup-record h3 { font-size: .8rem; color: #646e67; margin: 0 0 .65rem; }
+.followup-question, .followup-answer { display: flex; align-items: baseline; gap: .65rem; min-width: 0; }
+.followup-question { padding: .75rem; border-left: 3px solid #bdcdbd; border-radius: 0 .3rem .3rem 0; background: #eef2eb; }
+.followup-answer { padding: 0 .75rem; margin-top: .85rem; }
+.qa-label { flex-shrink: 0; font-size: .75rem; line-height: 1.5; font-weight: 650; color: #315c4d; }
+.followup-record p { margin: 0; min-width: 0; }
 button:disabled { opacity: .65; cursor: wait; }
 .confirm-label { display: flex; gap: .7rem; align-items: baseline; font-weight: 400; }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }

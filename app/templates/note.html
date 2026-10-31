@@ -96,10 +96,16 @@
       {% for followup in followups %}
       <article class="followup-record" aria-labelledby="followup-{{ loop.index }}">
         <h3 id="followup-{{ loop.index }}">Follow-up {{ loop.index }}</h3>
-        <h4>Question</h4>
-        <p class="preserve-lines">{{ followup.question }}</p>
-        <h4>Answer</h4>
-        <p class="preserve-lines">{{ followup.answer }}</p>
+        <h4 class="visually-hidden">Question</h4>
+        <div class="followup-question">
+          <span class="qa-label" aria-hidden="true">Q</span>
+          <p class="preserve-lines">{{ followup.question }}</p>
+        </div>
+        <h4 class="visually-hidden">Answer</h4>
+        <div class="followup-answer">
+          <span class="qa-label" aria-hidden="true">A</span>
+          <p class="preserve-lines">{{ followup.answer }}</p>
+        </div>
       </article>
       {% endfor %}
     </section>
