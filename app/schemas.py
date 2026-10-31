@@ -10,4 +10,6 @@ class NoteCreate(BaseModel):
 
 
 class ResearchSummary(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     summary: str = Field(min_length=1)

@@ -2,9 +2,12 @@ import json
 from dataclasses import asdict
 
 from app import database
+from app.config import GEMINI_API_KEY, SEARCH_API_KEY
 from app.models import Note, NoteStatus, utc_now
 from app.search.base import SearchResult
-from app.search.provider import get_search_provider
+from app.search.provider import MockSearchProvider, get_search_provider
+from app.search.queries import generate_queries, unique_sources
+from app.services.gemma import summarize_research
 
 
 def mock_summary(note: Note, results: list[SearchResult]) -> str:
@@ -28,8 +31,22 @@ def research_note(note_id: int) -> None:
             note.status = NoteStatus.researching
             session.commit()
 
-            results = get_search_provider().search(note.title)
-            note.research_summary = mock_summary(note, results)
+            provider = get_search_provider()
+            if isinstance(provider, MockSearchProvider):
+                results = provider.search(note.title)
+                summary = mock_summary(note, results)
+            else:
+                results = unique_sources([
+                    result
+                    for query in generate_queries(note.title, note.body, note.context)
+                    for result in provider.search(query)
+                ])
+                if not results:
+                    raise ValueError("Search found no useful sources for this thought.")
+                summary = summarize_research(
+                    f"{note.title}\n\n{note.body}", note.context, results
+                ).summary
+            note.research_summary = summary
             note.sources_json = json.dumps([asdict(result) for result in results])
             note.researched_at = utc_now()
             note.error_message = None
@@ -40,5 +57,9 @@ def research_note(note_id: int) -> None:
             note = session.get(Note, note_id)
             if note is not None:
                 note.status = NoteStatus.failed
-                note.error_message = f"Mock research failed: {str(exc) or type(exc).__name__}"
+                message = str(exc) or type(exc).__name__
+                for secret in (GEMINI_API_KEY, SEARCH_API_KEY):
+                    if secret:
+                        message = message.replace(secret, "[redacted]")
+                note.error_message = f"Research failed: {message[:500]}"
                 session.commit()

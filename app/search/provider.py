@@ -1,7 +1,8 @@
 from urllib.parse import urlencode
 
-from app.config import SEARCH_PROVIDER
+from app.config import SEARCH_API_KEY, SEARCH_PROVIDER
 from app.search.base import SearchProvider, SearchResult
+from app.search.brave import BraveSearchProvider
 
 
 class MockSearchProvider:
@@ -26,4 +27,6 @@ class MockSearchProvider:
 def get_search_provider() -> SearchProvider:
     if SEARCH_PROVIDER == "mock":
         return MockSearchProvider()
+    if SEARCH_PROVIDER == "brave":
+        return BraveSearchProvider(SEARCH_API_KEY)
     raise ValueError(f"Unsupported search provider: {SEARCH_PROVIDER}")

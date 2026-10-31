@@ -1,4 +1,5 @@
 import pytest
+import httpx
 from fastapi.testclient import TestClient
 from google import genai
 from sqlalchemy import create_engine
@@ -23,6 +24,7 @@ def test_database(tmp_path, monkeypatch):
         raise AssertionError("Tests must not create a live AI client")
 
     monkeypatch.setattr(genai, "Client", forbid_ai)
+    monkeypatch.setattr(httpx, "get", forbid_ai)
     database.init_database()
     try:
         yield session_factory

@@ -1,65 +1,102 @@
 # Current State
 
-The first local vertical slice is complete on Python 3.12: create a thought,
-persist it, run deterministic background mock research, save its summary and
-sources, and display the results. No external research or AI API is called.
+Real web research is implemented: save a thought, search with Brave, synthesize
+the supplied source snippets with Gemma 4, and display the brief and original
+source links. Default mock mode remains deterministic and requires no keys.
 
 # Completed
 
-- Home page with a validated title/thought/context form and newest-first cards.
-- POST /notes commits saved, then researching, schedules work by ID, and redirects.
-- Background research opens its own session and uses the existing search boundary.
-- Mock search returns three deterministic, query-based example.com sample sources.
-- Research saves a summary, valid source JSON, researched time, and complete state.
-- Failures roll back, preserve the original thought, and store a useful error.
-- Detail page displays all four states, source links, and UTC timestamps; only
-  researching pages refresh automatically every two seconds.
-- Added behavior tests with isolated temporary SQLite databases and a live-AI
-  client guard. The existing health test uses the same isolated setup.
-- Updated README and architecture; retained the visual map and MIT license.
-- Files changed: AGENTS.md, README.md, requirements.txt, app/main.py,
-  app/search/provider.py, app/services/research.py, app/static/styles.css,
-  app/templates/index.html, app/templates/note.html, tests/conftest.py,
-  tests/test_health.py, tests/test_notes.py, docs/ARCHITECTURE.md, docs/STATUS.md.
+- BraveSearchProvider implements SearchProvider using httpx, the standard web
+  search endpoint, X-Subscription-Token, five results, and a 15-second timeout.
+  It maps only title/URL/snippet, removes snippet markup, and reports missing
+  credentials, HTTP/network errors, and malformed responses clearly.
+- Provider selection supports mock and brave, with mock still the safe default.
+  Brave mode never silently falls back to sample research.
+- Deterministic query generation uses title, thought, and optional context:
+  at most two queries, capped at 240 characters/40 words, with duplicate avoidance.
+- Combined results retain the first occurrence of each normalized URL and at
+  most eight useful sources. Stored URLs remain exactly those returned by search.
+  No page scraping was added.
+- Research opens its own database session, commits researching, requires useful
+  sources, calls Gemma, and stores summary/source JSON/time/complete. Failures
+  preserve the original note and commit failed with credential-safe messages.
+- Gemma's only model remains gemma-4-26b-a4b-it. Its prompt asks for overview,
+  findings, next steps, and uncertainties, grounded only in supplied material.
+  It validates a small JSON summary, accepts a JSON fence, rejects blank or invalid
+  output, and uses a 60-second request timeout. No database or search logic is
+  present in the wrapper. Mock mode keeps local synthesis and title-only search.
+- Removed the blanket mock disclaimer from completed note pages; actual mock
+  summaries and sample sources still identify themselves. Existing visual style
+  and status refresh behavior remain intact.
+- Updated README and architecture, preserving the visual map and MIT license.
+- Added isolated tests for query generation, duplicate avoidance, Brave request
+  and response mapping, HTTP/network/malformed/empty results, URL normalization,
+  combined sources, real-mode success and failures, Gemma model/prompt/validation,
+  source rendering and refresh persistence, and secret redaction. No automated
+  test makes a live Brave or Gemini call.
 
-# In Progress
+# Files Changed
 
-None. The next task has not been started.
+- .env.example
+- README.md
+- app/schemas.py
+- app/search/brave.py (new)
+- app/search/provider.py
+- app/search/queries.py (new)
+- app/services/gemma.py
+- app/services/research.py
+- app/templates/note.html
+- docs/ARCHITECTURE.md
+- docs/STATUS.md
+- tests/conftest.py
+- tests/test_research.py (new)
 
-# Next Task
+# Verification
 
-Replace mocked research with the real research pipeline: generate focused search queries, connect one real web-search provider, and send retrieved source material to Gemma 4.
+Verified on 2026-10-31 using Python 3.12. Shell commands used the required rtk
+prefix (rtk proxy for Python commands).
+
+- Baseline: `.venv\Scripts\python -m pytest -q`: 17 passed, one upstream warning.
+- Final: `.venv\Scripts\python -m pytest -q`: 49 passed, one upstream warning.
+- `.venv\Scripts\python -m pip check`: no broken requirements.
+- `git diff --check`: passed.
+- `.venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8766`:
+  application startup completed. urllib requests confirmed `/health` returned
+  200 with status ok and `/` returned 200 with the Save thought form. Stopped
+  the verification server afterward; no manual note was inserted.
+- `.env` presence check reported both GEMINI_API_KEY and SEARCH_API_KEY absent
+  or empty, without printing credentials. Live verification was skipped.
+  Neither Brave nor Gemma was actually called live. The model call asserted by
+  the mocked SDK test is exactly `gemma-4-26b-a4b-it`.
+- Read repository instructions, status, handoff, source and tests; inspected
+  Git status/diff/log/branch/remotes. Reviewed official Brave and Gemma API docs.
+- Generated the requested insulation example queries locally:
+  1. Home insulation for an older German house What insulation approaches are commonly recommended for older houses, and what problems should I watch for?
+  2. Home insulation for an older German house I want practical options and risks rather than a general explanation.
+- An initial credential-presence command had a shell quoting error and was
+  corrected; no credential contents were printed.
 
 # Known Issues
 
-- Research is mock data, and sample URLs are not actual retrieved articles.
-- Live Gemma API behavior remains untested and its wrapper remains unused.
-- Background tasks do not survive process termination; an interrupted note can
-  remain researching. Recovery and retries are not part of this slice.
-- The installed Starlette TestClient emits an upstream deprecation warning for
-  its httpx transport. All tests pass; no warning is suppressed.
+- Live API access and real output quality remain unverified because both keys
+  are missing. Configure both keys and SEARCH_PROVIDER=brave, then restart and
+  run the requested insulation note before the final demo.
+- Briefs use search snippets only. Prompt constraints reduce unsupported claims
+  but do not independently fact-check model output; no full-page extraction is
+  included in this iteration.
+- Background tasks run in the web process and are not durable. A restart can
+  leave a note researching; retries/recovery remain outside this slice.
+- Starlette TestClient emits its existing upstream httpx deprecation warning.
+  Tests pass and the warning is not suppressed.
 
-# Last Verified Commands
+# Exact Next Task
 
-Verified on 2026-10-31 with Python 3.12:
+Polish the research experience for the final demo: improve research output readability, loading/status feedback, empty/error states, and run a final end-to-end review.
 
-- `.venv\Scripts\python -m pip install -r requirements.txt`: succeeded; added
-  python-multipart for form submissions.
-- `.venv\Scripts\python -m pytest -q`: 17 passed, 1 upstream warning.
-- `.venv\Scripts\python -m pip check`: no broken requirements.
-- `.venv\Scripts\python .venv\verify_slice_server.py`: started Uvicorn against
-  temporary SQLite. Browser verification passed: opened home, submitted a thought
-  with context, followed redirect, saw researching, saw automatic refresh reveal
-  complete, read summary and timestamp, checked three source links, returned home,
-  and found the completed thought. The disposable launcher held mock search until
-  released to observe researching; the application adds no artificial delay.
-  Launcher and screenshot are local verification artifacts excluded from Git.
-- README reviewed for simplicity; architecture map and MIT license retained.
-- Project content scanned for prohibited references: no matches.
-- `git diff --check`: passed.
+This next task has not been started.
 
-# Last Commit
+# Checkpoint
 
-`Implement note research vertical slice` is the checkpoint containing this status
-file. Use `git log -1 --oneline` for its hash. Destination:
-`origin/main` at https://github.com/rishabh-hasija/afterthought.git.
+Commit message: `Connect real web research and Gemma 4`.
+Destination: origin/main at https://github.com/rishabh-hasija/afterthought.git.
+Use `git log -1 --oneline` for this checkpoint's hash.

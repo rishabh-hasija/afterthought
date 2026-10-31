@@ -11,20 +11,34 @@
   stores text, context, status, summary, source JSON, errors, and UTC timestamps.
 - **Research service:** `research_note(note_id)` opens its own database session,
   loads the note, and uses the provider factory through the SearchProvider
-  interface. It creates a deterministic summary from the note and results, stores
+  interface. In Brave mode it generates at most two deterministic queries (240
+  characters and 40 words each), combines five results per query, and retains at
+  most eight useful sources in search order. URL comparison normalizes host case,
+  default ports, trailing slashes, query order, fragments, and tracking parameters;
+  stored URLs remain the originals. Gemma summarizes supplied titles and snippets.
+  Mock mode retains title-only sample search and deterministic local synthesis.
+  The service stores
   summary, source JSON, and researched time, then commits complete. On exceptions
   it rolls back, reloads the original note, and commits failed with an error.
 - **Search provider:** A small interface returns title, URL, and snippet. The
-  provider factory supports only a local mock returning three query-based sample
-  sources. These example.com links are clearly labelled mock data in the UI.
+  provider factory supports `mock` (the safe default) and `brave`. Mock returns
+  three query-based sample sources and labels its summary as mock research.
+  Brave calls the standard web search endpoint with a 15-second timeout and
+  maps titles, URLs, and descriptions; it never accesses the database or scrapes
+  pages. Missing keys, HTTP/network errors, and malformed responses fail clearly.
+  No useful sources also fails; there is no automatic mock fallback.
 - **Gemma service:** A standalone wrapper uses Google GenAI and only Gemma 4.
   It sends note text, context, and supplied results, then validates a JSON summary.
-  It has no database or search logic and is not called by the local workflow.
+  The brief asks for overview, findings, next steps, and uncertainties using only
+  supplied material. The schema remains one nonempty summary string; URLs are
+  controlled separately by the application. Requests time out after 60 seconds;
+  SDK errors are replaced with credential-safe messages. It has no database or
+  search logic and is not called in mock mode.
 
 The current call direction is UI -> API -> database / research service.
-Research calls mock search, creates a mock summary, and saves results to SQLite.
-The next pipeline will replace the mock summary with Gemma and connect a real
-search provider. Source URLs remain stored separately from summary text.
+Research calls search, synthesizes a brief, and saves results to SQLite.
+Source URLs remain stored separately from summary text. Automated tests replace
+both external service boundaries and use temporary SQLite databases.
 
 FastAPI background tasks run in the web process. A restart can interrupt them;
 durable job handling and recovery are outside the current scope.
