@@ -5,7 +5,52 @@ thought navigation, responsive drawer, readable research sections, visible
 Refresh action, and confirmed deletion. Existing Brave/Gemma research and
 deterministic default mock mode remain intact. No dependency was added.
 
-# Completed
+The product header is now sticky and contains only the menu toggle and brand.
+Desktop navigation and the mobile drawer begin below the persistent header.
+The home form now carries "Save the thought. Let AI research the rest."
+The header tagline has been removed from every page.
+
+# Latest Follow-up: Sticky Header and Home Message
+
+Completed on 2026-10-31:
+
+- Kept the header at its existing 4.5rem height, sticky at top: 0 with opaque
+  white background and z-index above navigation/content.
+- Shared --header-height between header, desktop sidebar, mobile drawer,
+  backdrop, and scroll-padding. Sidebar scrolling is constrained to the space
+  below the header; anchor targets clear the header as well.
+- Removed the top-right tagline and its CSS. Placed the exact requested
+  product message directly above the new-thought form on home only.
+- Files changed in this follow-up: app/static/styles.css,
+  app/templates/base.html, app/templates/index.html, docs/STATUS.md.
+- Read AGENTS.md, STATUS.md, HANDOFF.md and affected templates/styles/script.
+  Initial working tree was clean.
+- Baseline and final `rtk proxy .venv\Scripts\python -m pytest -q`:
+  64 passed, the same upstream Starlette/httpx warning.
+- `rtk git diff --check`: passed. Inspected `rtk git status --short` and
+  `rtk git diff --stat`; committed the checkpoint locally.
+- Browser verification used `rtk proxy .venv\Scripts\python .venv\ui_preview.py`
+  with a separate temporary SQLite database, mock mode, and a 30-item research
+  brief. No user notes or credentials were read/changed; no live APIs called.
+  Removed the preview script and stopped its server afterward.
+- At 1280x900, after scrolling 1143 CSS px, header top remained 0, header bottom
+  and sidebar top both remained 72px. Main content initially began at 72px.
+  Header contained only the toggle and brand.
+- At 375x812, scrolled research retained header top 0. Opening the drawer gave
+  drawer top/header bottom 72px and drawer bottom 812px. Document/viewport
+  widths matched (360 CSS px excluding scrollbar). Selecting New thought
+  closed the drawer and its input anchor landed below the header (about 88px).
+  Verified the exact home message and no message on the research page.
+  Reset browser viewport and closed the temporary tab.
+- Scrolled desktop preview saved outside the repo as
+  C:/Users/risha.RISHABH/.codex/visualizations/2026/10/31/01a19204-ce04-7543-b213-2be87a8c4e32/afterthought-sticky-header.png.
+- No new known issues. Existing limitations below remain. Exact next task
+  remains the live final-demo review recorded below, when requested/configured.
+
+Follow-up checkpoint message: `Keep product header visible and move home message`.
+Use `git log -1 --oneline` for its hash. No push requested.
+
+# Previous UI Polish Checkpoint
 
 - Added a shared AFTERTHOUGHT header and sidebar on home, detail, validation,
   and delete confirmation pages. All saved thoughts appear newest first,
