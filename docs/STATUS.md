@@ -1,62 +1,65 @@
 # Current State
 
-Initial foundation on Python 3.12. The app serves `/` and `/health`, creates the
-SQLite schema at startup, and has no note creation or research routes yet.
+The first local vertical slice is complete on Python 3.12: create a thought,
+persist it, run deterministic background mock research, save its summary and
+sources, and display the results. No external research or AI API is called.
 
 # Completed
 
-- Added all foundation files, the Note model and four statuses.
-- Added a replaceable search interface and an empty mock provider.
-- Added a standalone Gemma 4 wrapper with validated summary output.
-- Added simple templates, static files, environment settings, and a health test.
-- Added the README, MIT license, architecture, and shared agent handoff rules.
-- Files changed: README.md, LICENSE, AGENTS.md, CLAUDE.md, .gitignore,
-  .env.example, requirements.txt, all files under app/, tests/, and docs/.
+- Home page with a validated title/thought/context form and newest-first cards.
+- POST /notes commits saved, then researching, schedules work by ID, and redirects.
+- Background research opens its own session and uses the existing search boundary.
+- Mock search returns three deterministic, query-based example.com sample sources.
+- Research saves a summary, valid source JSON, researched time, and complete state.
+- Failures roll back, preserve the original thought, and store a useful error.
+- Detail page displays all four states, source links, and UTC timestamps; only
+  researching pages refresh automatically every two seconds.
+- Added behavior tests with isolated temporary SQLite databases and a live-AI
+  client guard. The existing health test uses the same isolated setup.
+- Updated README and architecture; retained the visual map and MIT license.
+- Files changed: AGENTS.md, README.md, requirements.txt, app/main.py,
+  app/search/provider.py, app/services/research.py, app/static/styles.css,
+  app/templates/index.html, app/templates/note.html, tests/conftest.py,
+  tests/test_health.py, tests/test_notes.py, docs/ARCHITECTURE.md, docs/STATUS.md.
 
 # In Progress
 
-None. Foundation complete; the next feature has not been started.
+None. The next task has not been started.
 
 # Next Task
 
-Implement the first vertical slice:
-
-create note -> save to SQLite -> start background task -> generate mocked
-research result -> save result -> display result.
-
-Persist the note before starting work. Give background work its own session.
-Store source URLs separately from the summary; preserve notes on failure.
-Use the statuses saved, researching, complete, and failed. Add behavior tests
-for persistence, successful research, and failure before connecting live APIs.
+Replace mocked research with the real research pipeline: generate focused search queries, connect one real web-search provider, and send retrieved source material to Gemma 4.
 
 # Known Issues
 
-- `research_note` is intentionally unimplemented. No POST /notes or note route.
-- Mock search returns no sources; a real search provider is deferred.
-- Live Gemma API behavior has not been tested. No credentials are required for
-  the foundation; invalid or empty model output raises a validation error.
-- Background tasks will not survive process termination once implemented.
+- Research is mock data, and sample URLs are not actual retrieved articles.
+- Live Gemma API behavior remains untested and its wrapper remains unused.
+- Background tasks do not survive process termination; an interrupted note can
+  remain researching. Recovery and retries are not part of this slice.
 - The installed Starlette TestClient emits an upstream deprecation warning for
-  its httpx transport. The health test passes; no warning is suppressed.
+  its httpx transport. All tests pass; no warning is suppressed.
 
 # Last Verified Commands
 
 Verified on 2026-10-31 with Python 3.12:
 
-- `py -3.12 -m venv .venv` and
-  `.venv\Scripts\python -m pip install -r requirements.txt`: succeeded.
-- `.venv\Scripts\python -m pytest -q`: 1 passed, 1 upstream warning.
+- `.venv\Scripts\python -m pip install -r requirements.txt`: succeeded; added
+  python-multipart for form submissions.
+- `.venv\Scripts\python -m pytest -q`: 17 passed, 1 upstream warning.
 - `.venv\Scripts\python -m pip check`: no broken requirements.
-- `.venv\Scripts\python .venv\verify_foundation.py`: all app modules imported;
-  a live Uvicorn subprocess served `/health`, `/`, CSS, and JavaScript with
-  HTTP 200; startup created all 11 Note columns. The local smoke script is
-  disposable and excluded from source control.
-- README reviewed for clarity; MIT license and requested copyright verified.
+- `.venv\Scripts\python .venv\verify_slice_server.py`: started Uvicorn against
+  temporary SQLite. Browser verification passed: opened home, submitted a thought
+  with context, followed redirect, saw researching, saw automatic refresh reveal
+  complete, read summary and timestamp, checked three source links, returned home,
+  and found the completed thought. The disposable launcher held mock search until
+  released to observe researching; the application adds no artificial delay.
+  Launcher and screenshot are local verification artifacts excluded from Git.
+- README reviewed for simplicity; architecture map and MIT license retained.
 - Project content scanned for prohibited references: no matches.
 - `git diff --check`: passed.
 
 # Last Commit
 
-`Initialize Afterthought foundation` is the initial checkpoint containing this
-status file. Use `git log -1 --oneline` for its hash. Intended destination:
+`Implement note research vertical slice` is the checkpoint containing this status
+file. Use `git log -1 --oneline` for its hash. Destination:
 `origin/main` at https://github.com/rishabh-hasija/afterthought.git.

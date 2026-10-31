@@ -3,14 +3,49 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Note | Afterthought</title>
+    <title>{{ note.title }} | Afterthought</title>
+    {% if note.status.value == 'researching' %}
+    <meta http-equiv="refresh" content="2">
+    {% endif %}
     <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
   </head>
   <body>
     <main>
       <a href="/">Afterthought</a>
-      <h1>Note</h1>
-      <p>Saved notes and their research will appear here.</p>
+      <h1>{{ note.title }}</h1>
+      <p><span class="status status-{{ note.status.value }}">{{ note.status.value }}</span></p>
+      <p class="muted">Created <time datetime="{{ note.created_at.isoformat() }}Z">{{ note.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time></p>
+      <h2>Original thought</h2>
+      <p class="preserve-lines">{{ note.body }}</p>
+      {% if note.context %}
+      <h2>Context</h2>
+      <p class="preserve-lines">{{ note.context }}</p>
+      {% endif %}
+      <section aria-label="Research">
+        <h2>Research</h2>
+        {% if note.status.value == 'saved' %}
+        <p>Saved. Research will start shortly.</p>
+        {% elif note.status.value == 'researching' %}
+        <p role="status">Researching your thought...</p>
+        {% elif note.status.value == 'complete' %}
+        <p class="muted">Local mock results; these are sample sources, not verified findings.</p>
+        <p class="preserve-lines">{{ note.research_summary }}</p>
+        <h3>Sources</h3>
+        <ul class="sources">
+          {% for source in sources %}
+          <li>{{ source.title }}<br><a href="{{ source.url }}">{{ source.url }}</a></li>
+          {% else %}
+          <li>No sources found.</li>
+          {% endfor %}
+        </ul>
+        {% if note.researched_at %}
+        <p class="muted">Researched <time datetime="{{ note.researched_at.isoformat() }}Z">{{ note.researched_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time></p>
+        {% endif %}
+        {% elif note.status.value == 'failed' %}
+        <p role="alert">Research failed.</p>
+        <p>{{ note.error_message }}</p>
+        {% endif %}
+      </section>
     </main>
   </body>
 </html>

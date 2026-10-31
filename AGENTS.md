@@ -6,8 +6,9 @@ This is the authoritative shared instruction file for Codex and Claude Code.
 
 Build a simple second-brain research tool: save a note immediately, research it
 in the background, and attach a useful summary and source URLs for later reading.
-The foundation includes startup, a home page, a health check, the Note model,
-and service boundaries. Do not start the next feature during foundation work.
+The current slice creates and lists notes, runs deterministic local mock research
+in a background task, and displays its summary and sample sources. Do not connect
+live AI or web search until the user requests the next task.
 
 ## Architecture
 
@@ -18,7 +19,7 @@ interface and the Gemma wrapper. Search returns title, URL, and snippet.
 Gemma only summarizes note text, context, and search material; it does not access
 the database or perform search. Gemma 4 is the only AI model.
 
-The intended note flow is: commit the note as saved, mark it researching, start a
+The note flow is: commit the note as saved, mark it researching, start a
 FastAPI background task, gather sources, summarize, store results, mark complete.
 On failure, preserve the note, mark failed, and store a useful error message.
 Each background task must open its own database session. These tasks run in the

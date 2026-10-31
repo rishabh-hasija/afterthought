@@ -6,9 +6,10 @@ You write something you want to remember or investigate. Afterthought saves it.
 While you move on with your day, it researches the topic. When you come back,
 the useful information is waiting beside your note.
 
-**Current version:** the application starts, displays a simple home page, and
-provides a health check. Saving notes and running research are the next step.
-Search currently returns no results; it does not access the internet yet.
+**Current version:** save a thought with optional context, then open its research
+and sources. Your thoughts appear newest first on the home page. Research uses
+deterministic local mock results and three sample links; no AI or search API is
+called yet.
 
 ## Architecture map
 
@@ -49,7 +50,7 @@ SQLite            Research Service
 - **Gemma 4:** Turns the gathered information into a useful summary.
 - **Research Result:** Contains the summary and source URLs saved with a note.
 
-The map shows the intended flow; the complete flow is not connected yet.
+The local flow works today; web search and Gemma 4 will replace the mock results later.
 
 ## Project structure
 
@@ -58,7 +59,7 @@ app/
   main.py, config.py       Web routes and settings
   database.py, models.py   SQLite connection and Note table
   schemas.py              Input and summary formats
-  services/               Research workflow and Gemma wrapper
+  services/               Local mock research and unused Gemma wrapper
   search/                 Search interface and mock provider
   templates/, static/     Simple web pages, CSS, and JavaScript
 tests/                    Automated checks
@@ -85,11 +86,11 @@ The app creates `afterthought.db` in the project directory when it starts.
 
 ## Environment variables
 
-Edit `.env`; keep it private. No API key is needed to start the foundation.
+Edit `.env`; keep it private. No API key is needed for the current local workflow.
 
 | Variable | Purpose |
 | --- | --- |
-| `GEMINI_API_KEY` | Key used by the Gemma wrapper when research is connected. |
+| `GEMINI_API_KEY` | Reserved for the Gemma wrapper; unused by mock research. |
 | `SEARCH_PROVIDER` | Leave blank or set to `mock`; no other provider exists yet. |
 | `SEARCH_API_KEY` | Reserved for a future search provider. |
 

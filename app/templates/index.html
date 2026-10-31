@@ -11,7 +11,37 @@
     <main>
       <h1>Afterthought</h1>
       <p>Save the thought. Let AI research the rest.</p>
-      <p>The foundation is ready. Saving notes and showing research comes next.</p>
+      <p>Write a thought to remember or investigate. Save it now and return to its findings later.</p>
+      <p class="muted">Research currently uses local mock results and sample links.</p>
+      {% if errors %}
+      <div role="alert" class="errors">
+        <p>Please check your thought:</p>
+        <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      {% set values = values or {} %}
+      <form action="/notes" method="post">
+        <label for="title">Title</label>
+        <input id="title" name="title" required maxlength="200" value="{{ values.get('title', '') }}">
+        <label for="body">Thought</label>
+        <textarea id="body" name="body" required rows="4">{{ values.get('body', '') }}</textarea>
+        <label for="context">Context <span class="muted">(optional)</span></label>
+        <textarea id="context" name="context" rows="2">{{ values.get('context', '') }}</textarea>
+        <button type="submit">Save thought</button>
+      </form>
+      <h2>Your thoughts</h2>
+      {% for note in notes %}
+      <article class="note-card">
+        <h3><a href="{{ url_for('note_detail', note_id=note.id) }}">{{ note.title }}</a></h3>
+        <p>{{ note.body | truncate(160) }}</p>
+        <p><span class="status status-{{ note.status.value }}">{{ note.status.value }}</span>
+          <time datetime="{{ note.created_at.isoformat() }}Z">{{ note.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</time>
+        </p>
+        <a href="{{ url_for('note_detail', note_id=note.id) }}">Open thought</a>
+      </article>
+      {% else %}
+      <p class="muted">No thoughts yet. Save your first one above.</p>
+      {% endfor %}
     </main>
   </body>
 </html>
