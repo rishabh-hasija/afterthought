@@ -1,4 +1,133 @@
-# Current State
+# Current State: Follow-ups and PDF Export
+
+Completed on 2026-10-31. This section supersedes the historical next tasks below.
+
+- Completed research supports up to four saved follow-ups, each with a trimmed,
+  nonempty question of at most 500 characters. Research only is the default;
+  conversation mode sends earlier questions/answers chronologically. The Gemma
+  service receives original thought, optional context, structured saved research,
+  saved sources and current question. Research-only prompts omit history entirely.
+  Neither mode calls search. Gemma 4 remains the only AI model.
+- Added FollowUp with a foreign key to Note, UTC creation time, stored context
+  mode, ordered relationship and ORM delete cascade. create_all adds the table
+  without replacing existing notes. Failures create no incomplete records and
+  display a generic useful error without exposing SDK exceptions or credentials.
+- One process-wide nonblocking lock covers follow-up validation, generation and
+  commit. Overlapping follow-ups return 409. Deletion and research-again requests
+  also return 409 during generation to prevent orphan/stale writes. Form submission
+  disables the button while waiting; the server also guards requests across tabs.
+- Added POST /notes/{note_id}/followups, GET /notes/{note_id}/export.pdf, and
+  POST /notes/{note_id}/research. Research again uses the existing background
+  pipeline, retains saved follow-ups and their four-question limit, and disallows
+  duplicate pending research. Existing deletion confirmation remains required.
+- Follow-up controls and document-style records appear before Sources. Research
+  again, Download PDF and Refresh sit beside Research. Delete thought remains
+  the only footer action; the sidebar remains primary navigation.
+- PDF includes title, original thought, optional context, four research sections,
+  all follow-ups, all source titles/full URLs and created/researched/exported UTC
+  timestamps. Safe ASCII attachment filename; application/pdf response; escaped
+  literal text, wrapping, multi-page splitting and page numbers. No database IDs,
+  internal statuses or credentials are added to the document.
+- ReportLab is the only new requirements.txt package. PDF embeds ReportLab's
+  bundled Vera fonts plus an OFL-licensed Noto Emoji fallback because an existing
+  source title contains a rocket. Font and license downloaded from
+  https://raw.githubusercontent.com/google/fonts/main/ofl/notoemoji/.
+  A focused TTFont subclass repairs ReportLab 4's astral-character CMap targets
+  into UTF-16 surrogate pairs so emoji render and extract correctly.
+
+## Files Changed in This Checkpoint
+
+- app/main.py
+- app/models.py
+- app/services/gemma.py
+- app/services/pdf_export.py (new)
+- app/static/app.js
+- app/static/styles.css
+- app/static/fonts/NotoEmoji.ttf (new)
+- app/static/fonts/OFL.txt (new)
+- app/templates/note.html
+- requirements.txt
+- tests/test_followups.py (new)
+- tests/test_pdf_export.py (new)
+- docs/STATUS.md
+- docs/HANDOFF.md
+
+## Verification and Commands
+
+- Read pasted task, AGENTS.md, RTK.md, STATUS.md, HANDOFF.md, current model,
+  schema, database, routes, services, templates, styles, script and tests.
+  Initial git status was clean. The initial instruction-reading command used
+  PowerShell directly before RTK.md was read; subsequent shell commands use rtk.
+- Baseline `rtk proxy .venv\Scripts\python -m pytest -q`: 64 passed.
+  Final: 90 passed, one existing Starlette/httpx deprecation warning.
+  New tests cover both modes, history omission/inclusion, chronological persistence,
+  validation/boundaries, four-item limit, incomplete/missing notes, failures,
+  escaping, concurrent follow-up/delete/research requests, cascade deletion,
+  additive initialization, Gemma prompt/model, PDF content/headers/long content,
+  safe filename, Unicode CMap, and research-again retention. Tests forbid live APIs.
+  Two intermediate PDF literal-markup assertions failed because XML escaping
+  produces adjacent PDF text runs; joined literal runs fixed the test correctly.
+- `rtk proxy .venv\Scripts\python -m pip install "reportlab>=4,<5"` installed
+  ReportLab 4.5.1 and its Pillow dependency into the project venv.
+- `rtk proxy .venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1
+  --port 8766` for browser review. Restarted after PDF font changes, stopped
+  afterward. No Brave calls or new original-research requests in manual review.
+- As explicitly requested, used the existing completed Gemma 4 research item and
+  configured Gemini credentials for THREE live follow-ups. These are saved in the
+  user's ignored local database: research, conversation, research modes in order.
+  First question was the requested solo-developer prototype question; answer chose
+  an offline study assistant from saved material. The requested second question
+  explained that option using the earlier answer. Third question asked which
+  hardware performance metrics to measure; answer gave TTFT, throughput, peak
+  RAM/VRAM and stability from saved research. Refresh preserved all three in order.
+  Exactly one follow-up slot remains. Credentials were never printed or changed.
+- Browser verified default context, both selectors, submission, reload, document
+  layout and Download PDF action. One browser snapshot timed out after the second
+  submission; database and a fresh snapshot confirmed success, with no duplicate
+  submission. Automated spies verify the exact history provided to Gemma.
+- Downloaded a three-page PDF through the route. Used bundled pypdf for independent
+  extraction: original thought, every saved follow-up question/answer and every
+  source title/full URL match after normalizing wrapping whitespace. Rendered all
+  three pages with bundled Poppler and inspected PNGs. Fixed the missing rocket
+  glyph and invalid astral CMap discovered during this verification; re-rendered
+  and re-extracted the corrected export successfully. Bundled pypdf/Poppler are
+  verification tools only, not new project dependencies.
+- Artifact-operation marker ran successfully before PDF creation. Export and
+  screenshots are outside the repository under
+  C:/Users/risha.RISHABH/.codex/visualizations/2026/10/31/01a1923b-7461-7912-8a42-7e03864e182b/.
+  Files: gemma-4-for-local-ai-applications.pdf, research-page-1.png through
+  research-page-3.png, afterthought-followups.png.
+- Inspected `rtk git diff --stat`, `rtk git status --short` and source diff;
+  `rtk git diff --check` passed. Committed locally, no push requested.
+  The staged check found upstream trailing whitespace in the new font license;
+  removed that whitespace and verified `rtk proxy git show --check` afterward.
+- Read one DEV session-lifecycle article and its empty discussion through DevRelay;
+  checked available challenge/event listings. No external publishing or messages.
+
+## Known Problems and Limits
+
+- Existing Starlette TestClient/httpx warning remains; all tests pass.
+- Follow-up exclusion assumes the existing single-process server; do not run
+  multiple Uvicorn workers without implementing shared exclusion first.
+- Research-again keeps previous follow-ups even when the brief changes; the saved
+  answers remain historical and are not recomputed or reset.
+- Gemma grounding is prompt-based, not a deterministic fact validator. The three
+  manual answers were consistent with saved material; this does not validate the
+  factual accuracy of the older research itself.
+- PDF fonts cover Latin research text and emoji; full CJK/other-script coverage
+  is not implemented. In-process research tasks remain non-durable on restart.
+
+## Exact Next Task
+
+Both requested features are complete. Next, when the user requests it, perform
+the existing final-demo review of the older-German-house-insulation use case with
+configured Brave/Gemma, checking source links and factual grounding. Do not spend
+the remaining follow-up slot on the existing Gemma item without a new request.
+
+Checkpoint message: `Add saved research follow-ups and PDF export`.
+Use `git log -1 --oneline` for its hash. No push requested.
+
+# Historical UI Checkpoints
 
 UI polish is complete. Afterthought has a shared product header, collapsible
 thought navigation, responsive drawer, readable research sections, visible

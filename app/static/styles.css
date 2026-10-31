@@ -43,7 +43,7 @@ main { width: 100%; max-width: 49rem; margin: 0 auto; padding: 3rem 2.5rem 4rem;
 .thought-form, .delete-form { padding: 1.5rem; border: 1px solid #dfe4dc; border-radius: .65rem; background: white; }
 .thought-form, .delete-form { margin: 2rem 0; }
 label { display: block; font-size: .9rem; font-weight: 600; margin-bottom: .4rem; }
-input:not([type="checkbox"]), textarea { width: 100%; padding: .7rem .8rem; margin-bottom: 1.25rem; border: 1px solid #aab7aa; border-radius: .35rem; background: #fdfefb; color: inherit; }
+input:not([type="checkbox"]):not([type="radio"]), textarea { width: 100%; padding: .7rem .8rem; margin-bottom: 1.25rem; border: 1px solid #aab7aa; border-radius: .35rem; background: #fdfefb; color: inherit; }
 input::placeholder, textarea::placeholder { color: #758073; }
 textarea { resize: vertical; }
 .form-hint { font-size: .8rem; margin: .8rem 0 0; }
@@ -73,6 +73,17 @@ textarea { resize: vertical; }
 .empty-state p { margin: .25rem 0; }
 .thought-footer { text-align: right; border-top: 1px solid #dfe4dc; padding-top: 1rem; margin-top: 2rem; font-size: .85rem; }
 .delete-link { color: #853b31; }
+.section-heading { flex-wrap: wrap; }
+.research-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.research-actions form { margin: 0; }
+.followup-section { border-top: 1px solid #dfe4dc; margin-top: 2rem; padding-top: .75rem; }
+.context-selector { border: 0; padding: 0; margin: 0 0 1rem; }
+.context-selector legend { font-size: .9rem; margin-bottom: .5rem; }
+.context-selector label { font-weight: 400; display: flex; align-items: baseline; gap: .5rem; }
+.followup-record { margin-top: 1.75rem; overflow-wrap: anywhere; }
+.followup-record h4 { font-size: .85rem; margin-bottom: .3rem; }
+.followup-record p { margin-top: .3rem; }
+button:disabled { opacity: .65; cursor: wait; }
 .confirm-label { display: flex; gap: .7rem; align-items: baseline; font-weight: 400; }
 .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
 .danger { background: #853b31; }

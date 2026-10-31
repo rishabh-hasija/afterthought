@@ -2,6 +2,14 @@
 
 Only one coding agent should actively modify the project at a time.
 
+Latest checkpoint adds saved follow-ups and PDF export. Read the TOP section of
+STATUS.md; its next task supersedes the older UI checkpoint tasks. The local
+Gemma research item now has three requested live follow-ups (research,
+conversation, research); one slot remains. Do not consume it during routine tests.
+Run the server with one process: follow-up exclusion currently uses an in-process
+lock. Install requirements.txt, which now includes ReportLab. Font assets and
+their license must remain available for PDF export.
+
 ## Incoming agent
 
 1. Read AGENTS.md.

@@ -60,3 +60,17 @@ sidebar.addEventListener("click", event => {
   if (smallScreen.matches && event.target.closest("a")) setMenu(false, true);
 });
 smallScreen.addEventListener("change", () => setMenu(smallScreen.matches ? false : desktopOpen, true));
+
+const followupForm = document.getElementById("followup-form");
+if (followupForm) {
+  followupForm.addEventListener("submit", event => {
+    if (followupForm.dataset.submitting) { event.preventDefault(); return; }
+    followupForm.dataset.submitting = "true";
+    followupForm.querySelector('button[type="submit"]').disabled = true;
+    document.getElementById("followup-status").textContent = "Answering your follow-up...";
+  });
+  window.addEventListener("pageshow", () => {
+    delete followupForm.dataset.submitting;
+    followupForm.querySelector('button[type="submit"]').disabled = false;
+  });
+}

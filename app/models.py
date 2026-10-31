@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from enum import StrEnum
 
-from sqlalchemy import DateTime, Enum, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -37,3 +37,19 @@ class Note(Base):
     )
     researched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     error_message: Mapped[str | None] = mapped_column(Text)
+    followups: Mapped[list["FollowUp"]] = relationship(
+        back_populates="note", cascade="all, delete-orphan",
+        order_by="(FollowUp.created_at, FollowUp.id)",
+    )
+
+
+class FollowUp(Base):
+    __tablename__ = "followups"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    note_id: Mapped[int] = mapped_column(ForeignKey("notes.id"), index=True)
+    question: Mapped[str] = mapped_column(String(500))
+    answer: Mapped[str] = mapped_column(Text)
+    context_mode: Mapped[str] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    note: Mapped[Note] = relationship(back_populates="followups")
